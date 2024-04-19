@@ -1,0 +1,3 @@
+[submodule "dns/dns-dockerfile"]
+	path = dns/dns-dockerfile
+	url = https://github.com/ResupinePuma/docker-dnsmasq-arm64.git

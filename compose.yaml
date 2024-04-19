@@ -1,0 +1,56 @@
+networks:
+  route1_network:
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.1.0/24
+
+services:
+  dns:
+    restart: always
+    build: ./dns/dns-dockerfile
+    volumes:
+      - ./dns/dnsmasq.conf:/etc/dnsmasq.conf
+    privileged: true
+    networks:
+      route1_network:
+        ipv4_address: 192.168.1.2
+
+  ubuntu:
+    build: ./ubuntu
+    networks:
+      route1_network:
+        ipv4_address: 192.168.1.40
+    volumes:
+      - ./packages:/packages
+    tty: true
+    dns:
+      - 192.168.1.2
+
+  postfix:
+    image: tozd/postfix:alpine-38
+    networks:
+      route1_network:
+        ipv4_address: 192.168.1.50
+    tty: true
+    environment:
+      - MAILNAME=mail.postfix.test
+      - MY_NETWORKS="127.0.0.0/8, 192.168.1.40"
+      - MY_DESTINATION=$$myhostname, localhost.$$mydomain, localhost, $$mydomain
+      - LOG_TO_STDOUT=1
+    dns:
+      - 192.168.1.2
+
+  recive-postfix:
+    build: ./recive-postfix
+    networks:
+      route1_network:
+        ipv4_address: 192.168.1.60
+    tty: true
+    environment:
+      - MAILNAME=mail.recive-postfix.test
+      - MY_NETWORKS="127.0.0.0/8, 192.168.1.50"
+      - MY_DESTINATION=$$myhostname, localhost.$$mydomain, localhost, $$mydomain
+      - LOG_TO_STDOUT=1
+    dns:
+      - 192.168.1.2
