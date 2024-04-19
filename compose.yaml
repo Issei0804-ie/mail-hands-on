@@ -28,7 +28,7 @@ services:
       - 192.168.1.2
 
   postfix:
-    image: tozd/postfix:alpine-38
+    build: ./postfix
     networks:
       route1_network:
         ipv4_address: 192.168.1.50
